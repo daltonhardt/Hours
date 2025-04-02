@@ -69,8 +69,8 @@ def process_audio(value, name_of_model, description):
                 # print('Temp file_name:', file_name)
                 audio = AudioSegment.from_file(file_name)
                 new_file = os.path.splitext(f.name)[0] +'.mp3'
-                # audio.export(new_file, bitrate='128k', format='mp3')
-                # print(f'===== audio file: \n {new_file}')
+                audio.export(new_file, bitrate='128k', format='mp3')
+                print(f'===== audio file: \n {new_file}')
 
             audio_file = genai.upload_file(new_file)
             # audio_file = genai.upload_file(file_name)
