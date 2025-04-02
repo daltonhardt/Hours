@@ -61,8 +61,7 @@ def process_audio(value, name_of_model, description):
     if value:
         with st.spinner("Working..."):
             # audio_file = st.audio(audio_value, format='audio/wav')
-            # with NamedTemporaryFile(dir='.', suffix='.wav', delete=True) as f:  #delete=False mantém o arquivo
-            with open("myTempFile.tmp", 'w+b') as f:  #delete=False mantém o arquivo
+            with NamedTemporaryFile(dir='.', suffix='.wav', delete=True) as f:  #delete=False mantém o arquivo
                 f.write(value.getbuffer())
                 # file_name = os.path.splitext(f.name)[0]
                 file_name = f.name
@@ -70,7 +69,7 @@ def process_audio(value, name_of_model, description):
                 # print('Temp file_name:', file_name)
                 audio = AudioSegment.from_file(file_name)
                 new_file = os.path.splitext(f.name)[0] +'.mp3'
-                audio.export(new_file, bitrate='128k', format='mp3')
+                # audio.export(new_file, bitrate='128k', format='mp3')
                 # print(f'===== audio file: \n {new_file}')
 
             audio_file = genai.upload_file(new_file)
