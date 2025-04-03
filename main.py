@@ -90,7 +90,7 @@ def process_audio(value, name_of_model, description, type):
                     st.download_button(
                         label='Guardar audio en MP3',
                         data=data,
-                        file_name= "audio-musica.mp3",
+                        file_name= "audio-horas.mp3",
                         mime="audio/mpeg"
                     )
 
