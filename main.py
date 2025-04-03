@@ -27,10 +27,10 @@ def html_table_format():
         <body>
             <table style="width:100%; border-collapse: collapse;">
                 <tr style="background-color:#99ff99;">
-                    <th colspan="2" align="center">HORAS OPERADORES</th>
+                    <th colspan="2" align="center">HORAS TRABAJADAS</th>
                 </tr>
                 <tr>
-                    <th colspan="2" align="center">Data: {datetime_string}</th>
+                    <th colspan="2" align="center">Fecha: {datetime_string}</th>
                 </tr>
                 <tr>
                     <th colspan="2" style="padding: 0.5em 0 0.5em 0; text-align: center; border: none;">Local: </th>
@@ -48,8 +48,8 @@ def html_table_format():
         """
     return out
 
-
-def process_audio(value, name_of_model, description):
+# @st.cache_data
+def process_audio(value, name_of_model, description, type):
     # Define Gemini AI instructions according to selected language
     system_instruction = (f"Based on what you understand from the audio file, give the answer in the language {lang}. "
                           f"Do the job with no verbosity, I don't want to display your comments. "
@@ -70,11 +70,10 @@ def process_audio(value, name_of_model, description):
                 audio = AudioSegment.from_file(file_name)
                 new_file = os.path.splitext(f.name)[0] +'.mp3'
                 audio.export(new_file, bitrate='128k', format='mp3')
-                print(f'===== audio file: \n {new_file}')
+                # print(f'===== mp3 file (new_file): \n {new_file}')
 
+            # st.audio(new_file, format="audio/mpeg")  # mostrar o audio player
             audio_file = genai.upload_file(new_file)
-            # audio_file = genai.upload_file(file_name)
-            # time.sleep(2)
 
             # get result from AI model
             # print(f'===== Giving the response using Google Generative AI model: {name_of_model}')
@@ -83,6 +82,17 @@ def process_audio(value, name_of_model, description):
             # for chunk in result:
             #     st.markdown(chunk.text, unsafe_allow_html=True)
 
+        if type == 'audio':
+            action1, action2 = st.columns(2)
+            with action1:  # download arquivo em MP3
+                with open(new_file, "rb") as f:
+                    data = f.read()
+                    st.download_button(
+                        label='Guardar audio en MP3',
+                        data=data,
+                        file_name= "audio-musica.mp3",
+                        mime="audio/mpeg"
+                    )
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
@@ -114,20 +124,20 @@ model_name = "gemini-2.0-flash"
 st.set_page_config(layout="wide")
 st.header('Eléctrica Industrial EL SHADDAI')
 st.subheader('HORAS DE TRABAJO')
-st.text(f'- powered by Google Gemini AI model {model_name}')
+st.text(f'- Google AI model {model_name}')
 st.divider()
 
 st.sidebar.markdown("# Menu")
 # Define language to be used
-lang = st.sidebar.selectbox("Select language:", LANG)
+lang = st.sidebar.selectbox("Seleccione el idioma:", LANG)
 
 # Tabs
-TAB_0 = 'Falar'
-TAB_1 = 'Carregar arquivo'
+TAB_0 = 'Hablar'
+TAB_1 = 'Subir archivo'
 
 tab = option_menu(
     menu_title='',
-    options=['Falar', 'Carregar arquivo'],
+    options=['Hablar', 'Subir archivo'],
     icons=['bi bi-mic-fill','bi-filetype-mp3'],
     menu_icon='cast',
     orientation='horizontal',
@@ -136,10 +146,18 @@ tab = option_menu(
 
 if tab == TAB_0:
     # Enter the audio
-    audio_value = st.audio_input("Clique no ícone do microfone para começar a falar e clique novamente para finalizar:")
-    process_audio(audio_value, model_name, DESC)
+    st.markdown("Habla normalmente incluyendo:")
+    st.markdown("- :blue-background[**el nombre de la obra**]")
+    st.markdown("- :red-background[**los nombres de los operarios**]")
+    st.markdown("- :green-background[**las horas trabajadas de cada uno**]")
+    st.markdown("- :blue-background[**la fecha**] (de lo contrario, el sistema usará la fecha de hoy).")
+    st.markdown("Haz clic en el ícono del micrófono abajo para comenzar a hablar y vuelve a hacer clic para finalizar.")
+    audio_value = st.audio_input("")
+    input_type = "audio"
+    process_audio(audio_value, model_name, DESC, input_type)
 
 if tab == TAB_1:
     # Select the audio file
-    audio_value = st.file_uploader(label='Selecione o arquivo:', type=['mp3', 'm4a', 'wav'])
-    process_audio(audio_value, model_name, DESC)
+    audio_value = st.file_uploader(label='Seleccione el archivo:', type=['mp3', 'm4a', 'wav'])
+    input_type = "file"
+    process_audio(audio_value, model_name, DESC, input_type)
